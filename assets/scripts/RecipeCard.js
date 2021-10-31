@@ -3,6 +3,9 @@ class RecipeCard extends HTMLElement {
     // Part 1 Expose - TODO
 
     // You'll want to attach the shadow DOM here
+    // Create a shadow root
+    super();
+    this.shadow = this.attachShadow({mode: 'open'});
   }
 
   set data(data) {
@@ -100,7 +103,137 @@ class RecipeCard extends HTMLElement {
     // created in the constructor()
 
     // Part 1 Expose - TODO
+    this.shadow.appendChild(card);
+    this.shadow.appendChild(styleElem);
+
+    let img = document.createElement("img");
+    img.setAttribute("src", getImg(data) );
+    img.setAttribute("alt", "Recipe Title");
+    card.appendChild(img);
+
+    let title = document.createElement("p");
+    title.setAttribute("class", "title");
+    let titleLink = document.createElement("a");
+    titleLink.setAttribute( "href", getUrl(data) );
+    let titleWords = document.createTextNode( getTitle(data) ); 
+    titleLink.textContent = titleWords.data;
+    title.appendChild( titleLink );
+    card.appendChild(title);
+
+    let org = document.createElement("p");
+    org.setAttribute("class", "organization");
+    org.textContent = getOrganization(data);
+    card.appendChild( org );
+
+    let rating = document.createElement("div");
+    rating.setAttribute("class", "rating");
+    let averageReview = document.createElement("span");
+    averageReview.textContent = getAverage( data );
+    rating.appendChild(averageReview);
+    if( getAverage( data ) != "No Reviews" ){
+      let reviewImg = document.createElement("img");
+      reviewImg.setAttribute("src", getReviewImg( data, getAverage( data ) ) );
+      //reviewImg.setAttribute("alt", getNumOfStars( data ) );
+      let totalReviews = document.createElement("span");
+      totalReviews.textContent = getTotalReviews( data );
+      rating.appendChild(reviewImg);
+      rating.appendChild(totalReviews);
+    }
+    card.appendChild(rating);
+
+
+    let time = document.createElement("time");
+    time.textContent = convertTime( getTime(data) );
+    card.appendChild( time );
+
+    let ingredients = document.createElement("p");
+    ingredients.setAttribute("class", "ingredients");
+    ingredients.textContent = createIngredientList( getIngredients(data) );
+    card.appendChild( ingredients );
   }
+}
+
+// getUrl with slight change for all functions
+function getImg(data) {
+  if (data.publisher?.name) return  data.image.url;
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("ImageObject") ) return data['@graph'][i].url;
+    }
+  };
+  return null;
+}
+
+function getTitle(data) {
+  if (data.name) return data.name;
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("WebPage") ) return data['@graph'][i].name;
+    }
+  };
+  return null;
+}
+
+function getAverage(data) {
+  if (data.publisher?.name) return "No Reviews";
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("Recipe") ) return data['@graph'][i].aggregateRating.ratingValue;
+    }
+  };
+  return null;
+}
+function getReviewImg(data, averageReview) {
+  if (averageReview == "No Reviews" ) return null;
+  else if ( averageReview < .5 ){
+    return "assets/images/icons/0-star.svg"
+  }
+  else if ( averageReview < 1.5 ){
+    return "assets/images/icons/1-star.svg"
+  }
+  else if ( averageReview < 2.5 ){
+    return "assets/images/icons/2-star.svg"
+  }
+  else if ( averageReview < 3.5 ){
+    return "assets/images/icons/3-star.svg"
+  }
+  else if ( averageReview < 4.5 ){
+    return "assets/images/icons/4-star.svg"
+  }
+  else{
+    return "assets/images/icons/5-star.svg"
+  }
+
+}
+function getTotalReviews(data) {
+  if (data.publisher?.name) return null;
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("Recipe") ) return "(" + data['@graph'][i].aggregateRating.ratingCount + ")";
+    }
+  };
+  return null;
+}
+
+function getTime(data) {
+  if (data.publisher?.name) return data.totalTime;
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("Recipe") ) return data['@graph'][i].totalTime;
+    }
+  };
+  return null;
+}
+
+function getIngredients(data) {
+  let ingredientArr;
+  if (data.publisher?.name) ingredientArr = data.recipeIngredient;
+  if (data['@graph']) {
+    for (let i = 0; i < data['@graph'].length; i++) {
+      if (data['@graph'][i]['@type'].includes("Recipe") )  ingredientArr = data['@graph'][i].recipeIngredient;
+    }
+  };
+  return ingredientArr;
 }
 
 
