@@ -1,1 +1,7 @@
-# Lab 6 - Starter
+# Lab 6
+
+Cole Rindal
+
+Everett Lin
+
+[Lab 6](https://cole-rindal.github.io/Lab6_Starter/)
