@@ -155,7 +155,7 @@ class RecipeCard extends HTMLElement {
 
 // getUrl with slight change for all functions
 function getImg(data) {
-  if (data.publisher?.name) return  data.image.url;
+  if (data.image?.url) return  data.image?.url;
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("ImageObject") ) return data['@graph'][i].url;
@@ -165,7 +165,8 @@ function getImg(data) {
 }
 
 function getTitle(data) {
-  if (data.name) return data.name;
+  //if (data.name) return data.name;
+  if (data.headline) return data.headline;
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("WebPage") ) return data['@graph'][i].name;
@@ -175,13 +176,13 @@ function getTitle(data) {
 }
 
 function getAverage(data) {
-  if (data.publisher?.name) return "No Reviews";
+  if (data.aggregateRating?.ratingValue) return data.aggregateRating?.ratingValue;
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("Recipe") ) return data['@graph'][i].aggregateRating.ratingValue;
     }
   };
-  return null;
+  return "No Reviews";
 }
 function getReviewImg(data, averageReview) {
   if (averageReview == "No Reviews" ) return null;
@@ -206,7 +207,7 @@ function getReviewImg(data, averageReview) {
 
 }
 function getTotalReviews(data) {
-  if (data.publisher?.name) return null;
+  if (data.aggregateRating?.ratingCount) return "(" + data.aggregateRating?.ratingCount + ")";
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("Recipe") ) return "(" + data['@graph'][i].aggregateRating.ratingCount + ")";
@@ -216,18 +217,19 @@ function getTotalReviews(data) {
 }
 
 function getTime(data) {
-  if (data.publisher?.name) return data.totalTime;
+  if (data.totalTime) return data.totalTime;
+  if (data.cookTime) return data.cookTime;
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("Recipe") ) return data['@graph'][i].totalTime;
     }
   };
-  return null;
+  return '';
 }
 
 function getIngredients(data) {
   let ingredientArr;
-  if (data.publisher?.name) ingredientArr = data.recipeIngredient;
+  if (data.recipeIngredient) ingredientArr = data.recipeIngredient;
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'].includes("Recipe") )  ingredientArr = data['@graph'][i].recipeIngredient;
